@@ -40,10 +40,32 @@ class Executor:
             step_result, current_soup, current_url = result
             results.append(step_result)
 
-        return ExecuteResponse(
+        response = ExecuteResponse(
             status="completed",
             results=results,
         )
+        self._save_result(response)
+        return response
+
+    def _save_result(self, response: ExecuteResponse) -> None:
+        """Persist completed execution results to a markdown file."""
+        import uuid
+        from datetime import datetime
+
+        execution_id = response.execution_id or str(uuid.uuid4())
+        content = f"# Execution {execution_id}\n\n"
+        content += f"**Status**: {response.status}\n\n"
+        content += f"**Timestamp**: {datetime.now().isoformat()}\n\n"
+        content += "## Results\n\n"
+        for r in response.results:
+            icon = "✅" if r.status == "success" else "❌"
+            content += f"- {icon} Step {r.step_index} ({r.type.value}): {r.status}"
+            if r.detail:
+                content += f" — {r.detail}"
+            content += "\n"
+
+        path = self.storage.base_dir / f"{execution_id}.md"
+        path.write_text(content)
 
     def _execute_step(
         self,
@@ -221,10 +243,13 @@ class Executor:
             step_result, current_soup, current_url = result
             results.append(step_result)
 
-        # Clean up
+        # Clean up HiL state and save final result
         self.storage.delete(execution_id)
 
-        return ExecuteResponse(
+        response = ExecuteResponse(
+            execution_id=execution_id,
             status="completed",
             results=results,
         )
+        self._save_result(response)
+        return response

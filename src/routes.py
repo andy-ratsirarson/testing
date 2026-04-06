@@ -1,12 +1,48 @@
 """FastAPI routes for the Browser Automation Service."""
 
-from fastapi import APIRouter, HTTPException
+from pathlib import Path
+
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import HTMLResponse
 
 from src.dto import ExecuteRequest, ExecuteResponse, ContinueRequest
 from src.executor import Executor
 
 router = APIRouter()
 executor = Executor()
+
+SAMPLE_HTML = Path(__file__).resolve().parent.parent / "tests" / "sample.html"
+
+
+@router.get("/sample", response_class=HTMLResponse)
+def sample():
+    """Serve the example home page."""
+    return SAMPLE_HTML.read_text()
+
+
+@router.post("/submit", response_class=HTMLResponse)
+async def submit(request: Request):
+    """Handle sample form submission and log to submissions folder."""
+    import uuid
+    from datetime import datetime
+    from urllib.parse import parse_qs
+
+    body = (await request.body()).decode()
+    fields = {k: v[0] for k, v in parse_qs(body).items()}
+
+    # Save submission to md file
+    sub_dir = Path(__file__).resolve().parent.parent / "submissions"
+    sub_dir.mkdir(exist_ok=True)
+    sub_id = str(uuid.uuid4())
+    content = f"# Submission {sub_id}\n\n"
+    content += f"**Timestamp**: {datetime.now().isoformat()}\n\n"
+    content += "## Fields\n\n"
+    for k, v in fields.items():
+        content += f"- **{k}**: {v}\n"
+    (sub_dir / f"{sub_id}.md").write_text(content)
+
+    items = "".join(f"<li><b>{k}</b>: {v}</li>" for k, v in fields.items())
+    return f"<html><body><h1>Form Submitted Successfully</h1><ul>{items}</ul></body></html>"
 
 
 @router.post("/execute", response_model=ExecuteResponse)

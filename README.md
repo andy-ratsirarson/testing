@@ -92,6 +92,45 @@ pytest tests/ -v
 
 The test suite includes a sample HTML page with a registration form, served by a local test server during tests.
 
+## Output Folders
+
+### `executions/`
+
+Stores a markdown file for each completed automation run. Each file records the execution status, timestamp, and per-step results.
+
+**Sample output** (`executions/<uuid>.md`):
+
+```markdown
+# Execution 96e16730-632d-4ddf-b6a5-9792c887d4f3
+
+**Status**: completed
+
+**Timestamp**: 2026-04-06T11:28:51.935086
+
+## Results
+
+- ✅ Step 0 (navigate): success — Navigated to http://127.0.0.1:8005/sample
+- ✅ Step 1 (fill_form): success — Form 'Registration' submitted
+```
+
+### `submissions/`
+
+Stores a markdown file for each form submission received by the `/submit` endpoint. Each file captures the timestamp and all submitted field values.
+
+**Sample output** (`submissions/<uuid>.md`):
+
+```markdown
+# Submission bd4d9417-1100-44ef-886d-37e80e07ac26
+
+**Timestamp**: 2026-04-06T11:28:35.786907
+
+## Fields
+
+- **firstname**: John
+- **lastname**: Doe
+- **csrf_token**: abc123
+```
+
 ## Limitations
 
 - **SSR only** -- does not execute JavaScript. Only works with server-rendered HTML.
