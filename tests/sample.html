@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Page</title></head>
+<body>
+    <h1>Registration</h1>
+    <form action="/submit" method="post">
+        <label for="firstname">First Name</label>
+        <input type="text" id="firstname" name="firstname" />
+        <label for="lastname">Last Name</label>
+        <input type="text" id="lastname" name="lastname" />
+        <input type="hidden" name="csrf_token" value="abc123" />
+        <input type="submit" value="Submit" />
+    </form>
+    <a href="/next">Next Page</a>
+</body>
+</html>
