@@ -1,0 +1,8 @@
+.claude/
+.metaswarm/
+.beads/
+venv/
+__pycache__/
+*.pyc
+executions/
+.pytest_cache/
